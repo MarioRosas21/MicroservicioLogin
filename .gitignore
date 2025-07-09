@@ -1,0 +1,11 @@
+# Ignora dependencias
+node_modules/
+
+# Variables de entorno (muy importante)
+.env
+
+# Archivos de logs o errores
+*.log
+
+# Archivos del sistema
+.DS_Store
