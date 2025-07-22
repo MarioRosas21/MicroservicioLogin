@@ -32,12 +32,16 @@ exports.login = async (req, res) => {
     const validPass = await bcrypt.compare(password, user.password);
     if (!validPass) return res.status(401).json({ message: 'Contraseña incorrecta' });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1m' });
+    const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_SECRET, { expiresIn: '7m' });
 
-    res.status(200).json({ message: 'Login exitoso', token });
+
+  res.status(200).json({ message: 'Login exitoso', token, refreshToken });
   } catch (error) {
-    res.status(500).json({ message: 'Error en login', error });
-  }
+  console.error("Error en login:", error.message);
+  res.status(500).json({ message: 'Error en login', error: error.message });
+}
+
 };
 
 exports.getSecretQuestion = async (req, res) => {
@@ -69,5 +73,26 @@ exports.verifySecretAnswer = async (req, res) => {
     res.status(200).json({ message: 'Contraseña actualizada correctamente' });
   } catch (error) {
     res.status(500).json({ message: 'Error', error });
+  }
+};
+
+exports.refreshToken = (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) return res.status(401).json({ message: 'Refresh token requerido' });
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
+    const newAccessToken = jwt.sign(
+      { id: decoded.id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1m' }
+    );
+
+    res.status(200).json({ token: newAccessToken });
+  } catch (error) {
+    console.error("Error al verificar refresh:", error.message);
+    res.status(403).json({ message: 'Refresh token inválido' });
   }
 };
