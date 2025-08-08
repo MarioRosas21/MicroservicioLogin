@@ -33,7 +33,7 @@ exports.login = async (req, res) => {
     if (!validPass) return res.status(401).json({ message: 'Contraseña incorrecta' });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1m' });
-    const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_SECRET, { expiresIn: '7m' });
+    const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_SECRET, { expiresIn: '4m' });
 
 
   res.status(200).json({ message: 'Login exitoso', token, refreshToken });
@@ -87,7 +87,7 @@ exports.refreshToken = (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id },
       process.env.JWT_SECRET,
-      { expiresIn: '1m' }
+      { expiresIn: '4m' }
     );
 
     res.status(200).json({ token: newAccessToken });
